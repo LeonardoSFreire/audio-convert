@@ -5,6 +5,7 @@ Serviço de conversão de áudio usando FFmpeg
 
 import os
 import io
+import json
 import hashlib
 import logging
 import subprocess
@@ -181,9 +182,32 @@ def init_s3_client():
         # Criar bucket se não existir
         try:
             s3_client.head_bucket(Bucket=S3_BUCKET)
+            logger.info(f"☁️ Bucket '{S3_BUCKET}' já existe")
         except:
             s3_client.create_bucket(Bucket=S3_BUCKET)
             logger.info(f"☁️ Bucket '{S3_BUCKET}' criado")
+            
+            # Aplicar política de acesso público
+            try:
+                bucket_policy = {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "PublicReadGetObject",
+                            "Effect": "Allow",
+                            "Principal": "*",
+                            "Action": "s3:GetObject",
+                            "Resource": f"arn:aws:s3:::{S3_BUCKET}/*"
+                        }
+                    ]
+                }
+                s3_client.put_bucket_policy(
+                    Bucket=S3_BUCKET,
+                    Policy=json.dumps(bucket_policy)
+                )
+                logger.info(f"☁️ Bucket '{S3_BUCKET}' configurado como público")
+            except Exception as policy_error:
+                logger.warning(f"⚠️ Não foi possível aplicar política pública: {policy_error}")
         return s3_client
     except Exception as e:
         logger.error(f"❌ Erro S3: {e}")
