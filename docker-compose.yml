@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  audio-converter-api:
+    build: .
+    container_name: audio-converter-api
+    ports:
+      - "8000:8000"
+    environment:
+      - API_KEY=${API_KEY:-}
+      - MAX_FILE_SIZE=100
+      - CACHE_ENABLED=true
+      - DEFAULT_BITRATE=128k
+      - DEFAULT_SAMPLE_RATE=44100
+    volumes:
+      - ./cache:/app/cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
