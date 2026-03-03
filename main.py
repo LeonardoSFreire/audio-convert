@@ -491,7 +491,7 @@ async def convert_audio(
 
 
 @app.post("/convert-url")
-async def convert_audio_to_url((
+async def convert_audio_to_url(
     file: UploadFile = File(..., description="Arquivo de áudio para converter"),
     output_format: str = Form(..., description="Formato de saída (mp3, wav, ogg, opus, m4a, flac, etc)"),
     codec: Optional[str] = Form(None, description="Codec específico (opcional)"),
