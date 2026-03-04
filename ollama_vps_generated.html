@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama VPS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-+xqJJXQoYAvvkiqiuKNRm/OgttbO55WRNfzsRCPnc8AndG6vXk5TtJUxjvrmT+x5ANrOE7E3WMPCA+qOV7E19Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            background-color: #333;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #00d;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+        .code {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ollama VPS</h1>
+    <h2>Endpoints</h2>
+    <ul>
+        <li><a href="/api/tags">/api/tags</a> - Lista de tags</li>
+        <li><a href="/api/generate">/api/generate</a> - Geração de texto</li>
+        <li><a href="/api/chat">/api/chat</a> - Chat</li>
+    </ul>
+    <h2>Exemplo de código curl</h2>
+    <pre>
+        <code class="code">
+            curl -X GET 'https://ollama-api.com/api/tags'
+        </code>
+    </pre>
+</body>
+</html>

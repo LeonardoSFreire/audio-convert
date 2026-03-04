@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦙 Ollama VPS API</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: #e2e8f0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.25);
+        }
+        
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            margin-top: 1rem;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        section {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .endpoint-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .endpoint-table th,
+        .endpoint-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .endpoint-table th {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .endpoint-table tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .method.get { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .method.post { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .method.delete { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        .code-block {
+            background: #0d1117;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .code-header {
+            background: rgba(148, 163, 184, 0.1);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+        
+        .code-header i {
+            color: #fbbf24;
+        }
+        
+        pre {
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        
+        code {
+            color: #e2e8f0;
+        }
+        
+        .comment { color: #6b7280; }
+        .string { color: #22c55e; }
+        .keyword { color: #f472b6; }
+        .function { color: #60a5fa; }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .info-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .info-card h3 {
+            color: #60a5fa;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-card p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: #e2e8f0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            margin-top: 2rem;
+        }
+        
+        footer a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .endpoint-table {
+                font-size: 0.875rem;
+            }
+            
+            .endpoint-table th,
+            .endpoint-table td {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦙 Ollama VPS API</h1>
+            <p>API de LLMs locais rodando em VPS dedicada</p>
+            <div class="status-badge">Online e Operacional</div>
+        </header>
+
+        <section>
+            <h2><i class="fas fa-server"></i> Informações do Servidor</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🌐 URL Base</h3>
+                    <p>http://207.244.247.167:11434</p>
+                </div>
+                <div class="info-card">
+                    <h3>🤖 Modelo Padrão</h3>
+                    <p>llama3.1:8b</p>
+                </div>
+                <div class="info-card">
+                    <h3>⚡ Versão</h3>
+                    <p>0.17.5</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔐 Autenticação</h3>
+                    <p>Nenhuma (nativo)</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2><i class="fas fa-plug"></i> Endpoints Disponíveis</h2>
+            <table class="endpoint-table">
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th>Endpoint</th>
+                        <th>Descrição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="method get">GET</span></td>
+                        <td><code>/api/tags</code></td>
+                        <td>Listar modelos instalados</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method post">POST</span></td>
+                        <td><code>/api/generate</code></td>
+                        <td>Gerar texto/completion</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method post">POST</span></td>
+                        <td><code>/api/chat</code></td>
+                        <td>Chat conversacional com histórico</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method post">POST</span></td>
+                        <td><code>/api/pull</code></td>
+                        <td>Baixar novo modelo</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method delete">DELETE</span></td>
+                        <td><code>/api/delete</code></td>
+                        <td>Remover modelo</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2><i class="fas fa-code"></i> Exemplos de Uso</h2>
+            
+            <h3 style="margin-top: 1.5rem; color: #94a3b8;">1. Listar Modelos</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <i class="fas fa-terminal"></i> curl
+                </div>
+                <pre><code>curl http://207.244.247.167:11434/api/tags</code></pre>
+            </div>
+
+            <h3 style="margin-top: 1.5rem; color: #94a3b8;">2. Gerar Texto</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <i class="fas fa-terminal"></i> curl
+                </div>
+                <pre><code>curl -X POST http://207.244.247.167:11434/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3.1:8b",
+    "prompt": "Explique Docker em 3 linhas",
+    "stream": false
+  }'</code></pre>
+            </div>
+
+            <h3 style="margin-top: 1.5rem; color: #94a3b8;">3. Chat com Contexto</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <i class="fas fa-terminal"></i> curl
+                </div>
+                <pre><code>curl -X POST http://207.244.247.167:11434/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3.1:8b",
+    "messages": [
+      {"role": "user", "content": "Qual a capital da França?"}
+    ],
+    "stream": false
+  }'</code></pre>
+            </div>
+
+            <h3 style="margin-top: 1.5rem; color: #94a3b8;">4. Baixar Novo Modelo</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <i class="fas fa-terminal"></i> curl
+                </div>
+                <pre><code>curl -X POST http://207.244.247.167:11434/api/pull \
+  -d '{"name": "qwen2.5:7b"}'</code></pre>
+            </div>
+        </section>
+
+        <section>
+            <h2><i class="fas fa-link"></i> API Wrapper (Porta 8000)</h2>
+            <p style="margin-bottom: 1rem; color: #94a3b8;">
+                API FastAPI com autenticação Bearer Token:
+            </p>
+            <div class="code-block">
+                <div class="code-header">
+                    <i class="fas fa-globe"></i> URL Base
+                </div>
+                <pre><code>https://iasolution-ollama-api.lbgxjy.easypanel.host/</code></pre>
+            </div>
+        </section>
+
+        <footer>
+            <p>
+                <i class="fas fa-robot"></i> 
+                HTML gerado por <strong>Ollama llama3.1:8b</strong> na VPS 
+                <br>
+                <a href="https://iasolution-ollama-api.lbgxjy.easypanel.host/docs">📚 Documentação OpenAPI</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
